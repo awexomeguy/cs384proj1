@@ -5,11 +5,10 @@ import javax.swing.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainDemo extends JApplet implements ActionListener
+public class MainDemo extends JApplet
 {
-	private Mover m;
-	private JButton startButton, stopButton;
-	private JSlider slider;
+	private Mover [] movers;
+	private JSlider [] sliders;
 	
 	Container c = getContentPane();
 	
@@ -17,45 +16,106 @@ public class MainDemo extends JApplet implements ActionListener
 	{
 		c.setLayout(new FlowLayout());
 		
-		startButton = new JButton("Start");
-		startButton.addActionListener(this);
+		// set up sliders to control speeds
+		sliders = new JSlider[4];
+		for(int i = 0; i < 4; ++i)
+		{
+			JPanel panel = new JPanel();
+			JLabel label = new JLabel();
+			
+			switch(i)
+			{
+				case 0:
+					label.setText("red");
+					break;
+				case 1:
+					label.setText("blue");
+					break;
+				case 2:
+					label.setText("green");
+					break;
+				case 3:
+					label.setText("orange");
+					break;
+			}
+			
+			sliders[i] = new JSlider(0, 10, 0);
+			sliders[i].setSnapToTicks(true);
+			panel.add(label);
+			panel.add(sliders[i]);
+			c.add(panel);
+		}
+
+		// set the movers' initial positions
+		movers = new Mover[4];
+		movers[0] = new Mover(this, sliders[0]);
+		movers[0].setPosition(MIN_X, 300);
+		movers[0].setDirection(Mover.UP);
 		
-		stopButton = new JButton("Stop");
-		stopButton.addActionListener(this);
+		movers[1] = new Mover(this, sliders[1]);
+		movers[1].setPosition(MIN_X, 350);
+		movers[1].setDirection(Mover.UP);
 		
-		slider = new JSlider(0, 10, 5);
-		slider.setSnapToTicks(true);
+		movers[2] = new Mover(this, sliders[2]);
+		movers[2].setPosition(MAX_X, 300);
+		movers[2].setDirection(Mover.DOWN);
 		
-		c.add(startButton);
-		c.add(stopButton);
-		c.add(slider);
+		movers[3] = new Mover(this, sliders[3]);
+		movers[3].setPosition(MAX_X, 350);
+		movers[3].setDirection(Mover.DOWN);
 		
-		m = new Mover(this, slider);
-		m.setPosition(275, 250);
-		
-		ExecutorService executor = Executors.newFixedThreadPool(1);
-		executor.execute(m);
+		// start all the movers
+		ExecutorService executor = Executors.newFixedThreadPool(4);
+		for(int i = 0; i < 4; ++i)
+			executor.execute(movers[i]);
 	}
 	
 	public void paint(Graphics g)
 	{
 		super.paint(g);
 		
-		g.drawOval(m.getX(), m.getY(), 50, 50);
-	}
-	
-	public void actionPerformed(ActionEvent e)
-	{
+		// draw the path for the movers
+		g.drawLine(MIN_X, MIN_Y, BRIDGE_LEFT, BRIDGE_Y);
+		g.drawLine(BRIDGE_LEFT, BRIDGE_Y, BRIDGE_RIGHT, BRIDGE_Y);
+		g.drawLine(BRIDGE_RIGHT, BRIDGE_Y, MAX_X, MIN_Y);
+		g.drawLine(MAX_X, MIN_Y, MAX_X, MAX_Y);
+		g.drawLine(MAX_X, MAX_Y, BRIDGE_RIGHT, BRIDGE_Y);
+		g.drawLine(BRIDGE_RIGHT, BRIDGE_Y, BRIDGE_LEFT, BRIDGE_Y);
+		g.drawLine(BRIDGE_LEFT, BRIDGE_Y, MIN_X, MAX_Y);
+		g.drawLine(MIN_X, MAX_Y, MIN_X, MIN_Y);
 		
+		//g.setColor(Color.RED);
+		// show the position of the movers
+		for(int i = 0; i < 4; ++i)
+		{
+			switch(i)
+			{
+				case 0:
+					g.setColor(Color.RED);
+					break;
+				case 1:
+					g.setColor(Color.BLUE);
+					break;
+				case 2:
+					g.setColor(Color.GREEN);
+					break;
+				case 3:
+					g.setColor(Color.ORANGE);
+					break;
+			}
+
+			g.fillOval(movers[i].getX() - 15, movers[i].getY() - 15, 30, 30);
+			g.drawString(movers[i].toString(), 10, 10 + i * 15);
+		}
 	}
 	
 	// the following parameters are used to define the path the Movers take
 	// the bridge is the critical section in this scenario
-	public int BRIDGE_LEFT_X;
-	public int BRIDGE_RIGHT_X;
-	public int BRIDGE_Y;
-	public int MAX_Y;
-	public int MIN_Y;
-	public int MAX_X;
-	public int MIN_X;
+	public static final int BRIDGE_LEFT = 300;
+	public static final int BRIDGE_RIGHT = 600;
+	public static final int BRIDGE_Y = 300;
+	public static final int MAX_Y = 500;
+	public static final int MIN_Y = 100;
+	public static final int MAX_X = 800;
+	public static final int MIN_X = 100;
 }
