@@ -82,7 +82,7 @@ public class Mover implements Runnable
 					else if(state == IN_CS)
 					{
 						setPosition(x - s.getValue(), MainDemo.BRIDGE_Y);
-						if(x < MainDemo.BRIDGE_LEFT) // if we reach the end of the bridge
+						if(x <= MainDemo.BRIDGE_LEFT) // if we reach the end of the bridge
 						{
 							setPosition(MainDemo.BRIDGE_LEFT, MainDemo.BRIDGE_Y);
 							state = NEITHER;
@@ -172,7 +172,7 @@ public class Mover implements Runnable
 	// convert the position of the Mover into a String representation
 	public String toString() 
 	{ 
-		return "[" + x + ", " + y + "]; " + direction + "; " + state; 
+		return "[" + x + ", " + y + "]";
 	}
 	
 	// these represent the current direction the Mover is moving

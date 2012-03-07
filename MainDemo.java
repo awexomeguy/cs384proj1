@@ -17,8 +17,8 @@ public class MainDemo extends JApplet
 		c.setLayout(new FlowLayout());
 		
 		// set up sliders to control speeds
-		sliders = new JSlider[4];
-		for(int i = 0; i < 4; ++i)
+		sliders = new JSlider[NUM_OF_MOVERS];
+		for(int i = 0; i < NUM_OF_MOVERS; ++i)
 		{
 			JPanel panel = new JPanel();
 			JLabel label = new JLabel();
@@ -47,7 +47,7 @@ public class MainDemo extends JApplet
 		}
 
 		// set the movers' initial positions
-		movers = new Mover[4];
+		movers = new Mover[NUM_OF_MOVERS];
 		movers[0] = new Mover(this, sliders[0]);
 		movers[0].setPosition(MIN_X, 300);
 		movers[0].setDirection(Mover.UP);
@@ -65,8 +65,8 @@ public class MainDemo extends JApplet
 		movers[3].setDirection(Mover.DOWN);
 		
 		// start all the movers
-		ExecutorService executor = Executors.newFixedThreadPool(4);
-		for(int i = 0; i < 4; ++i)
+		ExecutorService executor = Executors.newFixedThreadPool(NUM_OF_MOVERS);
+		for(int i = 0; i < NUM_OF_MOVERS; ++i)
 			executor.execute(movers[i]);
 	}
 	
@@ -86,7 +86,7 @@ public class MainDemo extends JApplet
 		
 		//g.setColor(Color.RED);
 		// show the position of the movers
-		for(int i = 0; i < 4; ++i)
+		for(int i = 0; i < NUM_OF_MOVERS; ++i)
 		{
 			switch(i)
 			{
@@ -118,4 +118,6 @@ public class MainDemo extends JApplet
 	public static final int MIN_Y = 100;
 	public static final int MAX_X = 800;
 	public static final int MIN_X = 100;
+	
+	public static final int NUM_OF_MOVERS = 4; // number of movers on the road
 }
