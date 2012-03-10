@@ -9,7 +9,9 @@ public class MainDemo extends JApplet
 {
 	private Mover [] movers;
 	private JSlider [] sliders;
-	
+        Graphics bufferGraphics;
+	Image offscreen;
+        
 	Container c = getContentPane();
 	
 	public void init()
@@ -45,6 +47,9 @@ public class MainDemo extends JApplet
 			panel.add(sliders[i]);
 			c.add(panel);
 		}
+                
+                offscreen = createImage(MAX_X+15,MAX_Y+15);
+                bufferGraphics = offscreen.getGraphics();
 
 		// set the movers' initial positions
 		movers = new Mover[NUM_OF_MOVERS];
@@ -69,9 +74,15 @@ public class MainDemo extends JApplet
 		for(int i = 0; i < NUM_OF_MOVERS; ++i)
 			executor.execute(movers[i]);
 	}
-	
+        
+	public void update(Graphics g)
+        {
+            super.paint(g);
+        }
+        
 	public void paint(Graphics g)
 	{
+            /*
 		super.paint(g);
 		
 		// draw the path for the movers
@@ -106,9 +117,50 @@ public class MainDemo extends JApplet
 
 			g.fillOval(movers[i].getX() - 15, movers[i].getY() - 15, 30, 30);
 			g.drawString(movers[i].toString(), 10, 10 + i * 15);
+		} */
+              
+            //------------//
+            super.paint(g);
+		
+		// draw the path for the movers
+                bufferGraphics.clearRect(0,0,(MAX_X+15),(MAX_Y+15));
+                
+		bufferGraphics.drawLine(MIN_X, MIN_Y, BRIDGE_LEFT, BRIDGE_Y);
+		bufferGraphics.drawLine(BRIDGE_LEFT, BRIDGE_Y, BRIDGE_RIGHT, BRIDGE_Y);
+		bufferGraphics.drawLine(BRIDGE_RIGHT, BRIDGE_Y, MAX_X, MIN_Y);
+		bufferGraphics.drawLine(MAX_X, MIN_Y, MAX_X, MAX_Y);
+		bufferGraphics.drawLine(MAX_X, MAX_Y, BRIDGE_RIGHT, BRIDGE_Y);
+		bufferGraphics.drawLine(BRIDGE_RIGHT, BRIDGE_Y, BRIDGE_LEFT, BRIDGE_Y);
+		bufferGraphics.drawLine(BRIDGE_LEFT, BRIDGE_Y, MIN_X, MAX_Y);
+		bufferGraphics.drawLine(MIN_X, MAX_Y, MIN_X, MIN_Y);
+		
+		//g.setColor(Color.RED);
+		// show the position of the movers
+		for(int i = 0; i < NUM_OF_MOVERS; ++i)
+		{
+			switch(i)
+			{
+				case 0:
+					bufferGraphics.setColor(Color.RED);
+					break;
+				case 1:
+					bufferGraphics.setColor(Color.BLUE);
+					break;
+				case 2:
+					bufferGraphics.setColor(Color.GREEN);
+					break;
+				case 3:
+					bufferGraphics.setColor(Color.ORANGE);
+					break;
+			}
+
+			bufferGraphics.fillOval(movers[i].getX() - 15, movers[i].getY() - 15, 30, 30);
+			bufferGraphics.drawString(movers[i].toString(), 10, 10 + i * 15);
+                        g.drawImage(offscreen,0,50,this);
 		}
 	}
-	
+        
+        
 	// the following parameters are used to define the path the Movers take
 	// the bridge is the critical section in this scenario
 	public static final int BRIDGE_LEFT = 300;
