@@ -1,3 +1,4 @@
+import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -9,6 +10,7 @@ public class MainDemo extends JApplet
 {
 	private Mover [] movers;
 	private JSlider [] sliders;
+	private Queue [] threadq = new Queue[NUM_OF_MOVERS];
         Graphics bufferGraphics;
 	Image offscreen;
         
@@ -53,21 +55,25 @@ public class MainDemo extends JApplet
 
 		// set the movers' initial positions
 		movers = new Mover[NUM_OF_MOVERS];
-		movers[0] = new Mover(this, sliders[0]);
+		movers[0] = new Mover(this, sliders[0],threadq);
 		movers[0].setPosition(MIN_X, 300);
 		movers[0].setDirection(Mover.UP);
+		movers[0].setID(0);
 		
-		movers[1] = new Mover(this, sliders[1]);
+		movers[1] = new Mover(this, sliders[1],threadq);
 		movers[1].setPosition(MIN_X, 350);
 		movers[1].setDirection(Mover.UP);
+		movers[1].setID(1);
 		
-		movers[2] = new Mover(this, sliders[2]);
+		movers[2] = new Mover(this, sliders[2],threadq);
 		movers[2].setPosition(MAX_X, 300);
 		movers[2].setDirection(Mover.DOWN);
+		movers[2].setID(2);
 		
-		movers[3] = new Mover(this, sliders[3]);
+		movers[3] = new Mover(this, sliders[3],threadq);
 		movers[3].setPosition(MAX_X, 350);
 		movers[3].setDirection(Mover.DOWN);
+		movers[3].setID(3);
 		
 		// start all the movers
 		ExecutorService executor = Executors.newFixedThreadPool(NUM_OF_MOVERS);

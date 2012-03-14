@@ -1,3 +1,4 @@
+import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -9,15 +10,34 @@ public class Mover implements Runnable
 	protected int x, y; // coordinates of the Mover
 	protected int state; // state of the Mover (in CS, waiting for CS, or neither)
 	protected int direction; // current direction of Mover
+	protected int ID;
+	protected Queue [] q;
+	protected boolean [] pending = new boolean[MainDemo.NUM_OF_MOVERS];
+	protected boolean [] acks = new boolean[MainDemo.NUM_OF_MOVERS];
 	
-	public Mover(JApplet app, JSlider slide)
+	public Mover(JApplet app, JSlider slide,Queue[] Q)
 	{
 		a = app;
 		s = slide;
+		q = Q;
+		
 	}
+	
+	private void clearq()
+	{
+		for(int i = 0; i < MainDemo.NUM_OF_MOVERS; i++)
+		{
+			pending[i] = false;
+			acks[i] = false;
+		}
+		acks[ID] = true;
+	}
+	
+	private void MessageParse(Message M){}
 	
 	public void run()
 	{
+		//clearq();
 		while(true)
 		{
 			try
@@ -25,7 +45,11 @@ public class Mover implements Runnable
                             Thread.sleep(100);
 			} catch(InterruptedException ex){};
 			
-			
+			/*while(!q[ID].isEmpty())
+			{
+				MessageParse( (Message)q[ID].remove());
+			}
+			*/
 			if(direction == RIGHT) // we are currently moving right
 			{
 				if(x < MainDemo.BRIDGE_LEFT) // not yet to the bridge
@@ -131,6 +155,16 @@ public class Mover implements Runnable
 		y = b;
 	}
 
+	public void setID(int id)
+	{
+		ID = id;
+	}
+	
+	public int getID()
+	{
+		return ID;
+	}
+	
 	// get x coordinate
 	public int getX() 
 	{ 
