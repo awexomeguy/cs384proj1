@@ -6,9 +6,9 @@ public class Message
 	public boolean m_type; // request = FALSE ... ack = TRUE
 	public Date m_timestamp;
 	
-	Message(int ID, boolean Type, Date Timestamp)
+	Message(int senderID, boolean Type, Date Timestamp)
 	{
-		m_id = ID;
+		m_id = senderID;
 		m_type = Type;
 		m_timestamp = Timestamp;
 	}

@@ -49,8 +49,8 @@ public class MainDemo extends JApplet
 			c.add(panel);
 		}
                 
-                offscreen = createImage(MAX_X+15,MAX_Y+15);
-                bufferGraphics = offscreen.getGraphics();
+        offscreen = createImage(MAX_X+15,MAX_Y+15);
+        bufferGraphics = offscreen.getGraphics();
 
 		// set the movers' initial positions
 		movers = new Mover[NUM_OF_MOVERS];
@@ -128,7 +128,7 @@ public class MainDemo extends JApplet
             super.paint(g);
 		
 		// draw the path for the movers
-                bufferGraphics.clearRect(0,0,(MAX_X+15),(MAX_Y+15));
+        bufferGraphics.clearRect(0,0,(MAX_X+15),(MAX_Y+15));
                 
 		bufferGraphics.drawLine(MIN_X, MIN_Y, BRIDGE_LEFT, BRIDGE_Y);
 		bufferGraphics.drawLine(BRIDGE_LEFT, BRIDGE_Y, BRIDGE_RIGHT, BRIDGE_Y);
@@ -161,7 +161,7 @@ public class MainDemo extends JApplet
 
 			bufferGraphics.fillOval(movers[i].getX() - 15, movers[i].getY() - 15, 30, 30);
 			bufferGraphics.drawString(movers[i].toString(), 10, 10 + i * 15);
-                        g.drawImage(offscreen,0,50,this);
+            g.drawImage(offscreen,0,50,this);
 		}
 	}
         

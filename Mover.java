@@ -15,6 +15,7 @@ public class Mover implements Runnable
 	protected BlockingQueue [] q;
 	protected boolean [] pending = new boolean[MainDemo.NUM_OF_MOVERS];
 	protected boolean [] acks = new boolean[MainDemo.NUM_OF_MOVERS];
+	protected Date reqStamp; // so we know when we sent a request
 	
 	public Mover(JApplet app, JSlider slide, BlockingQueue[] Q)
 	{
@@ -34,23 +35,65 @@ public class Mover implements Runnable
 		acks[ID] = true;
 	}
 	
-	private void MessageParse(Message M){}
+	private void parseMessage(Message m)
+	{
+		if(m.isRequest()) // if the message is a request
+			switch(state)
+			{
+				case IN_CS: // queue the request
+					pending[m.sender()] = true;
+					break;
+				case WAITING: // only send ack if timestamp is before our own, else queue it
+					if(m.getTimestamp().before(reqStamp))
+						sendAckTo(m.sender());
+					else
+						pending[m.sender()] = true;
+					break;
+				case NEITHER: // send ack automatically
+					sendAckTo(m.sender());
+					break;
+			}
+		else if(m.isAck())
+			acks[m.sender()] = true; // record the ack we receive
+	}
+	
+	private void sendRequestToAll()
+	{
+		reqStamp = new Date();
+	
+		for(int i = 0; i < MainDemo.NUM_OF_MOVERS; ++i)
+			if(i != ID) // don't put into our own queue, dummy
+				try
+				{
+					q[i].put(new Message(ID, Message.REQUEST, reqStamp)); // puts a request in all others' queue
+				} catch(InterruptedException ex){};
+	}
+	
+	private void sendAckTo(int receiver)
+	{
+		try
+		{
+			q[receiver].put(new Message(ID, Message.ACK, null)); // timestamp is null because we don't care about timestamps on acks
+		} catch(InterruptedException ex){};
+	}
 	
 	public void run()
 	{
-		//clearq();
 		while(true)
 		{
 			try
 			{
-                            Thread.sleep(100);
+				Thread.sleep(100);
 			} catch(InterruptedException ex){};
 			
 			/*while(!q[ID].isEmpty())
 			{
-				MessageParse( (Message)q[ID].remove());
-			}
-			*/
+				try 
+				{
+					parseMessage( (Message)q[ID].poll(100, TimeUnit.MILLISECONDS));
+				} catch(InterruptedException ex){};
+			}*/
+
 			if(direction == RIGHT) // we are currently moving right
 			{
 				if(x < MainDemo.BRIDGE_LEFT) // not yet to the bridge
