@@ -77,6 +77,35 @@ public class Mover implements Runnable
 		} catch(InterruptedException ex){};
 	}
 	
+	private boolean checkAcks()
+	{
+		for(int i = 0; i < MainDemo.NUM_OF_MOVERS; i++)
+		{
+			// Return false if any acks in the array are still missing
+			if(i != ID) // Don't check self
+			{
+				if(acks[i] == false)
+				{
+					return false;
+				}
+			}
+		}
+		
+		// We made it through the loop, all acks were received.
+		return true;
+	}
+	
+	private void sendAcksToPending()
+	{
+		for(int i = 0; i < MainDemo.NUM_OF_MOVERS;i++)
+		{
+			if(pending[i] == true)
+			{
+				sendAckTo(i);
+			}
+		}
+	}
+	
 	public void run()
 	{
 		while(true)
@@ -86,6 +115,7 @@ public class Mover implements Runnable
 				Thread.sleep(100);
 			} catch(InterruptedException ex){};
 			
+			// Check for messages.
 			/*while(!q[ID].isEmpty())
 			{
 				try 
@@ -103,13 +133,21 @@ public class Mover implements Runnable
 					{
 						setPosition(MainDemo.BRIDGE_LEFT, MainDemo.BRIDGE_Y);
 						state = WAITING;
-						state = IN_CS; // only to see if visualizer works, will remove
+						
+						// Send request to all
+						sendRequestToAll();
 					}
 				}
 				else if(x >= MainDemo.BRIDGE_LEFT && x < MainDemo.BRIDGE_RIGHT) // we are on the bridge
 				{
-					if(state == WAITING);
-						// mutual exclusion stuff here
+					if(state == WAITING)
+					{
+						// Go to critical section if we received all ACKs.
+						if(checkAcks() == true)
+						{
+							state = IN_CS;
+						}
+					}	
 					else if(state == IN_CS)
 					{
 						setPosition(x + s.getValue(), MainDemo.BRIDGE_Y);
@@ -117,6 +155,9 @@ public class Mover implements Runnable
 						{
 							setPosition(MainDemo.BRIDGE_RIGHT, MainDemo.BRIDGE_Y);
 							state = NEITHER;
+							
+							// Send ack to each on pending list
+							sendAcksToPending();
 						}
 					}
 				}
@@ -140,13 +181,22 @@ public class Mover implements Runnable
 					{
 						setPosition(MainDemo.BRIDGE_RIGHT, MainDemo.BRIDGE_Y);
 						state = WAITING;
-						state = IN_CS; // only to see if visualizer works, will remove
+						
+						// SEND REQUEST TO ALL
+						sendRequestToAll();
+						
 					}
 				}
 				else if(x > MainDemo.BRIDGE_LEFT && x <= MainDemo.BRIDGE_RIGHT) // we are on the bridge
 				{
-					if(state == WAITING);
-						// mutual exclusion stuff here
+					if(state == WAITING)
+					{
+						// Go to critical section if we received all ACKs.
+						if(checkAcks() == true)
+						{
+							state = IN_CS;
+						}
+					}
 					else if(state == IN_CS)
 					{
 						setPosition(x - s.getValue(), MainDemo.BRIDGE_Y);
@@ -154,6 +204,9 @@ public class Mover implements Runnable
 						{
 							setPosition(MainDemo.BRIDGE_LEFT, MainDemo.BRIDGE_Y);
 							state = NEITHER;
+							
+							// SEND ACK TO EACH ON PENDING
+							sendAcksToPending();
 						}
 					}
 				}

@@ -10,7 +10,7 @@ public class MainDemo extends JApplet
 	private Mover [] movers;
 	private JSlider [] sliders;
 	private BlockingQueue [] threadq = new BlockingQueue[NUM_OF_MOVERS];
-        Graphics bufferGraphics;
+    Graphics bufferGraphics;
 	Image offscreen;
         
 	Container c = getContentPane();
@@ -86,46 +86,9 @@ public class MainDemo extends JApplet
         }
         
 	public void paint(Graphics g)
-	{
-            /*
-		super.paint(g);
-		
-		// draw the path for the movers
-		g.drawLine(MIN_X, MIN_Y, BRIDGE_LEFT, BRIDGE_Y);
-		g.drawLine(BRIDGE_LEFT, BRIDGE_Y, BRIDGE_RIGHT, BRIDGE_Y);
-		g.drawLine(BRIDGE_RIGHT, BRIDGE_Y, MAX_X, MIN_Y);
-		g.drawLine(MAX_X, MIN_Y, MAX_X, MAX_Y);
-		g.drawLine(MAX_X, MAX_Y, BRIDGE_RIGHT, BRIDGE_Y);
-		g.drawLine(BRIDGE_RIGHT, BRIDGE_Y, BRIDGE_LEFT, BRIDGE_Y);
-		g.drawLine(BRIDGE_LEFT, BRIDGE_Y, MIN_X, MAX_Y);
-		g.drawLine(MIN_X, MAX_Y, MIN_X, MIN_Y);
-		
-		//g.setColor(Color.RED);
-		// show the position of the movers
-		for(int i = 0; i < NUM_OF_MOVERS; ++i)
-		{
-			switch(i)
-			{
-				case 0:
-					g.setColor(Color.RED);
-					break;
-				case 1:
-					g.setColor(Color.BLUE);
-					break;
-				case 2:
-					g.setColor(Color.GREEN);
-					break;
-				case 3:
-					g.setColor(Color.ORANGE);
-					break;
-			}
-
-			g.fillOval(movers[i].getX() - 15, movers[i].getY() - 15, 30, 30);
-			g.drawString(movers[i].toString(), 10, 10 + i * 15);
-		} */
-              
-            //------------//
-            super.paint(g);
+	{   
+        //------------//
+        super.paint(g);
 		
 		// draw the path for the movers
         bufferGraphics.clearRect(0,0,(MAX_X+15),(MAX_Y+15));
