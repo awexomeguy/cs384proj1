@@ -25,11 +25,18 @@ public class Mover implements Runnable
 		
 	}
 	
-	private void clearq()
+	private void clearPending()
 	{
 		for(int i = 0; i < MainDemo.NUM_OF_MOVERS; i++)
 		{
 			pending[i] = false;
+		}
+	}
+	
+	private void clearAcks()
+	{
+		for(int i = 0; i < MainDemo.NUM_OF_MOVERS; i++)
+		{
 			acks[i] = false;
 		}
 		acks[ID] = true;
@@ -106,6 +113,15 @@ public class Mover implements Runnable
 		}
 	}
 	
+	//Test function
+	private void setAcks()
+	{
+		for(int i = 0; i < MainDemo.NUM_OF_MOVERS; i++)
+		{
+			acks[i] = true;
+		}
+	}
+	
 	public void run()
 	{
 		while(true)
@@ -135,7 +151,7 @@ public class Mover implements Runnable
 						state = WAITING;
 						
 						// Send request to all
-						sendRequestToAll();
+						//sendRequestToAll();
 					}
 				}
 				else if(x >= MainDemo.BRIDGE_LEFT && x < MainDemo.BRIDGE_RIGHT) // we are on the bridge
@@ -143,9 +159,11 @@ public class Mover implements Runnable
 					if(state == WAITING)
 					{
 						// Go to critical section if we received all ACKs.
+						setAcks(); // REMOVE THIS ***
 						if(checkAcks() == true)
 						{
 							state = IN_CS;
+							clearAcks();
 						}
 					}	
 					else if(state == IN_CS)
@@ -157,7 +175,8 @@ public class Mover implements Runnable
 							state = NEITHER;
 							
 							// Send ack to each on pending list
-							sendAcksToPending();
+							//sendAcksToPending();
+							clearPending();
 						}
 					}
 				}
@@ -183,7 +202,7 @@ public class Mover implements Runnable
 						state = WAITING;
 						
 						// SEND REQUEST TO ALL
-						sendRequestToAll();
+						//sendRequestToAll();
 						
 					}
 				}
@@ -192,9 +211,11 @@ public class Mover implements Runnable
 					if(state == WAITING)
 					{
 						// Go to critical section if we received all ACKs.
+						setAcks(); // Remove this ***
 						if(checkAcks() == true)
 						{
 							state = IN_CS;
+							clearAcks();
 						}
 					}
 					else if(state == IN_CS)
@@ -206,7 +227,8 @@ public class Mover implements Runnable
 							state = NEITHER;
 							
 							// SEND ACK TO EACH ON PENDING
-							sendAcksToPending();
+							//sendAcksToPending();
+							clearPending();
 						}
 					}
 				}

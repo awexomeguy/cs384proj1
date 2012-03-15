@@ -82,7 +82,7 @@ public class MainDemo extends JApplet
         
 	public void update(Graphics g)
         {
-            super.paint(g);
+			super.paint(g);
         }
         
 	public void paint(Graphics g)
