@@ -3,14 +3,13 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class MainDemo extends JApplet
 {
 	private Mover [] movers;
 	private JSlider [] sliders;
-	private Queue [] threadq = new Queue[NUM_OF_MOVERS];
+	private BlockingQueue [] threadq = new BlockingQueue[NUM_OF_MOVERS];
         Graphics bufferGraphics;
 	Image offscreen;
         

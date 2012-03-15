@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -11,11 +12,11 @@ public class Mover implements Runnable
 	protected int state; // state of the Mover (in CS, waiting for CS, or neither)
 	protected int direction; // current direction of Mover
 	protected int ID;
-	protected Queue [] q;
+	protected BlockingQueue [] q;
 	protected boolean [] pending = new boolean[MainDemo.NUM_OF_MOVERS];
 	protected boolean [] acks = new boolean[MainDemo.NUM_OF_MOVERS];
 	
-	public Mover(JApplet app, JSlider slide,Queue[] Q)
+	public Mover(JApplet app, JSlider slide, BlockingQueue[] Q)
 	{
 		a = app;
 		s = slide;
