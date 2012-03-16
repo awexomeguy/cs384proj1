@@ -1,7 +1,5 @@
 import java.util.*;
 import java.util.concurrent.*;
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 public class Mover implements Runnable
@@ -12,7 +10,7 @@ public class Mover implements Runnable
 	protected int state; // state of the Mover (in CS, waiting for CS, or neither)
 	protected int direction; // current direction of Mover
 	protected int ID;
-	protected LinkedBlockingQueue [] q;
+	protected LinkedBlockingQueue<Message> [] q;
 	protected boolean [] pending = new boolean[MainDemo.NUM_OF_MOVERS];
 	protected boolean [] acks = new boolean[MainDemo.NUM_OF_MOVERS];
 	protected Date reqStamp; // so we know when we sent a request
@@ -22,6 +20,7 @@ public class Mover implements Runnable
 		f = frame;
 		s = slide;
 		q = Q;
+                state = NEITHER;
 		
 	}
 	
@@ -42,41 +41,53 @@ public class Mover implements Runnable
 		acks[ID] = true;
 	}
 	
-	private void parseMessage(Message m)
+	private synchronized void parseMessage(Message m)
 	{
-		if(m.isRequest()) // if the message is a request
-			switch(state)
-			{
-				case IN_CS: // queue the request
-					pending[m.sender()] = true;
-					break;
-				case WAITING: // only send ack if timestamp is before our own, else queue it
-					if(m.getTimestamp().before(reqStamp))
-						sendAckTo(m.sender());
-					else
-						pending[m.sender()] = true;
-					break;
-				case NEITHER: // send ack automatically
-					sendAckTo(m.sender());
-					break;
-			}
-		else if(m.isAck())
-			acks[m.sender()] = true; // record the ack we receive
+            
+            System.out.println("ID: " + m.m_id + ", Type:" + m.m_type + ", Timestamp: " + m.m_timestamp);
+            
+            if(m.isRequest()) {
+                
+                // if the message is a request
+                System.out.println("State: " + state);
+                
+                switch(state)
+                {
+                        case IN_CS: // queue the request
+                                pending[m.sender()] = true;
+                                break;
+                        case WAITING: // only send ack if timestamp is before our own, else queue it
+                                if(m.getTimestamp().before(reqStamp))
+                                        sendAckTo(m.sender());
+                                else
+                                        pending[m.sender()] = true;
+                                break;
+                        case NEITHER: // send ack automatically
+                                sendAckTo(m.sender());
+                                break;
+                }
+                        
+            } else if(m.isAck()) {
+                acks[m.sender()] = true; // record the ack we receive
+            }
+        
 	}
 	
-	private void sendRequestToAll()
+	private synchronized void sendRequestToAll()
 	{
 		reqStamp = new Date();
 	
 		for(int i = 0; i < MainDemo.NUM_OF_MOVERS; ++i)
 			if(i != ID) // don't put into our own queue, dummy
+			{
 				try
 				{
 					q[i].put(new Message(ID, Message.REQUEST, reqStamp)); // puts a request in all others' queue
 				} catch(InterruptedException ex){};
+			}
 	}
 	
-	private void sendAckTo(int receiver)
+	private synchronized void sendAckTo(int receiver)
 	{
 		try
 		{
@@ -124,6 +135,7 @@ public class Mover implements Runnable
 	
 	public void run()
 	{
+            
 		while(true)
 		{
 			try
@@ -136,7 +148,7 @@ public class Mover implements Runnable
 			{
 				try 
 				{
-					parseMessage( (Message)q[ID].poll(100, TimeUnit.MILLISECONDS));
+                                        parseMessage(q[ID].poll(100, TimeUnit.MILLISECONDS));
 				} catch(InterruptedException ex){};
 			}
 
@@ -151,7 +163,7 @@ public class Mover implements Runnable
 						state = WAITING;
 						
 						// Send request to all
-						//sendRequestToAll();
+						sendRequestToAll();
 					}
 				}
 				else if(x >= MainDemo.BRIDGE_LEFT && x < MainDemo.BRIDGE_RIGHT) // we are on the bridge
@@ -159,7 +171,7 @@ public class Mover implements Runnable
 					if(state == WAITING)
 					{
 						// Go to critical section if we received all ACKs.
-						setAcks(); // REMOVE THIS ***
+						//setAcks(); // REMOVE THIS ***
 						if(checkAcks() == true)
 						{
 							state = IN_CS;
@@ -175,7 +187,7 @@ public class Mover implements Runnable
 							state = NEITHER;
 							
 							// Send ack to each on pending list
-							//sendAcksToPending();
+							sendAcksToPending();
 							clearPending();
 						}
 					}
@@ -202,7 +214,7 @@ public class Mover implements Runnable
 						state = WAITING;
 						
 						// SEND REQUEST TO ALL
-						//sendRequestToAll();
+						sendRequestToAll();
 						
 					}
 				}
@@ -211,7 +223,7 @@ public class Mover implements Runnable
 					if(state == WAITING)
 					{
 						// Go to critical section if we received all ACKs.
-						setAcks(); // Remove this ***
+						//setAcks(); // Remove this ***
 						if(checkAcks() == true)
 						{
 							state = IN_CS;
@@ -227,7 +239,7 @@ public class Mover implements Runnable
 							state = NEITHER;
 							
 							// SEND ACK TO EACH ON PENDING
-							//sendAcksToPending();
+							sendAcksToPending();
 							clearPending();
 						}
 					}
