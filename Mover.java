@@ -6,20 +6,20 @@ import javax.swing.*;
 
 public class Mover implements Runnable
 {
-	protected JApplet a;
+	protected JFrame f;
 	protected JSlider s;
 	protected int x, y; // coordinates of the Mover
 	protected int state; // state of the Mover (in CS, waiting for CS, or neither)
 	protected int direction; // current direction of Mover
 	protected int ID;
-	protected BlockingQueue [] q;
+	protected LinkedBlockingQueue [] q;
 	protected boolean [] pending = new boolean[MainDemo.NUM_OF_MOVERS];
 	protected boolean [] acks = new boolean[MainDemo.NUM_OF_MOVERS];
 	protected Date reqStamp; // so we know when we sent a request
 	
-	public Mover(JApplet app, JSlider slide, BlockingQueue[] Q)
+	public Mover(JFrame frame, JSlider slide, LinkedBlockingQueue [] Q)
 	{
-		a = app;
+		f = frame;
 		s = slide;
 		q = Q;
 		
@@ -132,13 +132,13 @@ public class Mover implements Runnable
 			} catch(InterruptedException ex){};
 			
 			// Check for messages.
-			/*while(!q[ID].isEmpty())
+			while(!q[ID].isEmpty())
 			{
 				try 
 				{
 					parseMessage( (Message)q[ID].poll(100, TimeUnit.MILLISECONDS));
 				} catch(InterruptedException ex){};
-			}*/
+			}
 
 			if(direction == RIGHT) // we are currently moving right
 			{
@@ -262,8 +262,8 @@ public class Mover implements Runnable
 				}
 			}
 			
-			//repaint the applet to reflect the position change
-			a.repaint();
+			//repaint the frame to reflect the position change
+			f.repaint();
 		}
 	}
 	

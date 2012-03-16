@@ -5,17 +5,22 @@ import javax.swing.*;
 
 import java.util.concurrent.*;
 
-public class MainDemo extends JApplet
+public class MainDemo extends JFrame
 {
 	private Mover [] movers;
 	private JSlider [] sliders;
-	private BlockingQueue [] threadq = new BlockingQueue[NUM_OF_MOVERS];
+	private LinkedBlockingQueue [] threadq = new LinkedBlockingQueue[NUM_OF_MOVERS];
     Graphics bufferGraphics;
 	Image offscreen;
         
 	Container c = getContentPane();
 	
-	public void init()
+	public static void main(String [] args)
+	{
+		new MainDemo();
+	}
+	
+	public MainDemo()
 	{
 		c.setLayout(new FlowLayout());
 		
@@ -23,7 +28,7 @@ public class MainDemo extends JApplet
 		sliders = new JSlider[NUM_OF_MOVERS];
 		for(int i = 0; i < NUM_OF_MOVERS; ++i)
 		{
-			JPanel panel = new JPanel();
+			threadq[i] = new LinkedBlockingQueue();
 			JLabel label = new JLabel();
 			
 			switch(i)
@@ -44,32 +49,36 @@ public class MainDemo extends JApplet
 			
 			sliders[i] = new JSlider(0, 10, 0);
 			sliders[i].setSnapToTicks(true);
-			panel.add(label);
-			panel.add(sliders[i]);
-			c.add(panel);
+			c.add(label);
+			c.add(sliders[i]);
 		}
+		
+		setTitle("Mutual Exclusion");
+		setSize(1300,600);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
                 
         offscreen = createImage(MAX_X+15,MAX_Y+15);
         bufferGraphics = offscreen.getGraphics();
 
 		// set the movers' initial positions
 		movers = new Mover[NUM_OF_MOVERS];
-		movers[0] = new Mover(this, sliders[0],threadq);
+		movers[0] = new Mover(this, sliders[0], threadq);
 		movers[0].setPosition(MIN_X, 300);
 		movers[0].setDirection(Mover.UP);
 		movers[0].setID(0);
 		
-		movers[1] = new Mover(this, sliders[1],threadq);
+		movers[1] = new Mover(this, sliders[1], threadq);
 		movers[1].setPosition(MIN_X, 350);
 		movers[1].setDirection(Mover.UP);
 		movers[1].setID(1);
 		
-		movers[2] = new Mover(this, sliders[2],threadq);
+		movers[2] = new Mover(this, sliders[2], threadq);
 		movers[2].setPosition(MAX_X, 300);
 		movers[2].setDirection(Mover.DOWN);
 		movers[2].setID(2);
 		
-		movers[3] = new Mover(this, sliders[3],threadq);
+		movers[3] = new Mover(this, sliders[3], threadq);
 		movers[3].setPosition(MAX_X, 350);
 		movers[3].setDirection(Mover.DOWN);
 		movers[3].setID(3);
@@ -81,9 +90,9 @@ public class MainDemo extends JApplet
 	}
         
 	public void update(Graphics g)
-        {
-			super.paint(g);
-        }
+	{
+		super.paint(g);
+	}
         
 	public void paint(Graphics g)
 	{   
@@ -92,7 +101,8 @@ public class MainDemo extends JApplet
 		
 		// draw the path for the movers
         bufferGraphics.clearRect(0,0,(MAX_X+15),(MAX_Y+15));
-                
+         
+		bufferGraphics.setColor(Color.BLACK);
 		bufferGraphics.drawLine(MIN_X, MIN_Y, BRIDGE_LEFT, BRIDGE_Y);
 		bufferGraphics.drawLine(BRIDGE_LEFT, BRIDGE_Y, BRIDGE_RIGHT, BRIDGE_Y);
 		bufferGraphics.drawLine(BRIDGE_RIGHT, BRIDGE_Y, MAX_X, MIN_Y);
