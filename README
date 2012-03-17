@@ -1,0 +1,25 @@
+The assignment is split into 2 parts:
+	First, to implement Ricart and Agrawala's algorithm in the problem described in the assignment
+	Second, to modify the algorithm to allow multiple people to cross the bridge if they are moving in the same direction
+	
+The solution to the first part can be found in the directory 'demo1'
+To compile, go into the directory 'demo1' and use the command
+
+	javac *.java
+	
+Then to run the program, use the command
+
+	java MainDemo
+	
+Use the sliders at the top of the window to control the movement speed of the people (represented by colored circles)
+
+The solution to the second part can be found in the directory 'demo2'
+To compile, go into the directory 'demo2' and use the command
+
+	javac *.java
+	
+Then to run the program, use the command
+
+	java MainDemo2
+	
+Use the sliders at the top of the window to control the movement speed of the people (represented by colored circles)

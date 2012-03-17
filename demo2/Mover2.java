@@ -2,6 +2,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import javax.swing.*;
 
+// this class emulates the people and their decision-making process.
+// the mutual exclusion code is included in this class.
 public class Mover2 implements Runnable
 {
 	protected JFrame f;
@@ -10,20 +12,20 @@ public class Mover2 implements Runnable
 	protected int state; // state of the Mover (in CS, waiting for CS, or neither)
 	protected int direction; // current direction of Mover
 	protected int ID;
-	protected LinkedBlockingQueue<Message2> [] q;
-	protected boolean [] pending = new boolean[MainDemo2.NUM_OF_MOVERS];
-	protected boolean [] acks = new boolean[MainDemo2.NUM_OF_MOVERS];
+	protected LinkedBlockingQueue<Message2> [] q; // acts as the message channels for all movers
+	protected boolean [] pending = new boolean[MainDemo2.NUM_OF_MOVERS]; // to keep track of all pending requests
+	protected boolean [] acks = new boolean[MainDemo2.NUM_OF_MOVERS]; // to keep track of received acks
 	protected Date reqStamp; // so we know when we sent a request
-	
+
 	public Mover2(JFrame frame, JSlider slide, LinkedBlockingQueue [] Q)
 	{
 		f = frame;
 		s = slide;
 		q = Q;
-                state = NEITHER;
-		
+		state = NEITHER;
 	}
-	
+
+	// clears all records of pending requests we received
 	private void clearPending()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; i++)
@@ -31,49 +33,52 @@ public class Mover2 implements Runnable
 			pending[i] = false;
 		}
 	}
-	
+
+	// clears all records of acks we received
 	private void clearAcks()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; i++)
 		{
 			acks[i] = false;
 		}
+		
 		acks[ID] = true;
 	}
-	
+
+	// this method takes a Message as input and the mover
+	// takes the appropriate action according to the content of the message
 	private synchronized void parseMessage(Message2 m)
 	{
-            if(m.isRequest()) {  
-                // if the message is a request
-                switch(state)
-                {
-                        case IN_CS:
-							if(direction == m.getDirection())
-								sendAckTo(m.sender());
-							else
-                                pending[m.sender()] = true;
-                                break;
-                        case WAITING: // only send ack if timestamp is before our own or going in same direction, else queue it
-                                if(m.getTimestamp().before(reqStamp) || direction == m.getDirection())
-                                        sendAckTo(m.sender());
-                                else
-                                        pending[m.sender()] = true;
-                                break;
-                        case NEITHER: // send ack automatically
-                                sendAckTo(m.sender());
-                                break;
-                }
-                        
-            } else if(m.isAck()) {
-                acks[m.sender()] = true; // record the ack we receive
-            }
-        
+		if(m.isRequest()) {  
+			switch(state)
+			{
+				case IN_CS: // if they are going in the same direction send ack, else queue the request
+					if(direction == m.getDirection())
+						sendAckTo(m.sender());
+					else
+						pending[m.sender()] = true;
+					break;
+				case WAITING: // only send ack if timestamp is before our own or going in same direction, else queue it
+					if(m.getTimestamp().before(reqStamp) || direction == m.getDirection())
+						sendAckTo(m.sender());
+					else
+						pending[m.sender()] = true;
+					break;
+				case NEITHER: // send ack automatically
+					sendAckTo(m.sender());
+					break;
+			}
+		} else if(m.isAck()) {
+			acks[m.sender()] = true; // record the ack we receive
+		}
+
 	}
-	
+
+	// this method puts a request into the queue of all other movers
 	private synchronized void sendRequestToAll()
 	{
 		reqStamp = new Date();
-	
+
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; ++i)
 			if(i != ID) // don't put into our own queue, dummy
 			{
@@ -83,7 +88,8 @@ public class Mover2 implements Runnable
 				} catch(InterruptedException ex){};
 			}
 	}
-	
+
+	// this method puts an ack message into the queue of the specified mover
 	private synchronized void sendAckTo(int receiver)
 	{
 		try
@@ -91,7 +97,9 @@ public class Mover2 implements Runnable
 			q[receiver].put(new Message2(ID, Message2.ACK, null, direction)); // timestamp is null because we don't care about those on acks
 		} catch(InterruptedException ex){};
 	}
-	
+
+	// this method tells the mover whether it has received all necessary acks or not.
+	// returns true if the mover has all needed acks (can enter CS), otherwise false
 	private boolean checkAcks()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; i++)
@@ -105,11 +113,13 @@ public class Mover2 implements Runnable
 				}
 			}
 		}
-		
+
 		// We made it through the loop, all acks were received.
 		return true;
 	}
-	
+
+	// this method puts an ack message into the queue of all movers
+	// recorded in the pending array
 	private void sendAcksToPending()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS;i++)
@@ -120,32 +130,24 @@ public class Mover2 implements Runnable
 			}
 		}
 	}
-	
-	//Test function
-	private void setAcks()
-	{
-		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; i++)
-		{
-			acks[i] = true;
-		}
-	}
-	
+
+	// this method is the actual simulation.
+	// the mover will change its position, direction, and state according to messages it receives
 	public void run()
 	{
-            
 		while(true)
 		{
 			try
 			{
 				Thread.sleep(100);
 			} catch(InterruptedException ex){};
-			
-			// Check for messages.
+
+			// Check for messages and take appropriate action
 			while(!q[ID].isEmpty())
 			{
 				try 
 				{
-                    parseMessage(q[ID].poll(100, TimeUnit.MILLISECONDS));
+					parseMessage(q[ID].poll(100, TimeUnit.MILLISECONDS));
 				} catch(InterruptedException ex){};
 			}
 
@@ -158,7 +160,7 @@ public class Mover2 implements Runnable
 					{
 						setPosition(MainDemo2.BRIDGE_LEFT, MainDemo2.BRIDGE_Y);
 						state = WAITING;
-						
+
 						// Send request to all
 						sendRequestToAll();
 					}
@@ -168,7 +170,6 @@ public class Mover2 implements Runnable
 					if(state == WAITING)
 					{
 						// Go to critical section if we received all ACKs.
-						//setAcks(); // REMOVE THIS ***
 						if(checkAcks() == true)
 						{
 							state = IN_CS;
@@ -182,7 +183,7 @@ public class Mover2 implements Runnable
 						{
 							setPosition(MainDemo2.BRIDGE_RIGHT, MainDemo2.BRIDGE_Y);
 							state = NEITHER;
-							
+
 							// Send ack to each on pending list
 							sendAcksToPending();
 							clearPending();
@@ -209,10 +210,9 @@ public class Mover2 implements Runnable
 					{
 						setPosition(MainDemo2.BRIDGE_RIGHT, MainDemo2.BRIDGE_Y);
 						state = WAITING;
-						
+
 						// SEND REQUEST TO ALL
 						sendRequestToAll();
-						
 					}
 				}
 				else if(x > MainDemo2.BRIDGE_LEFT && x <= MainDemo2.BRIDGE_RIGHT) // we are on the bridge
@@ -220,7 +220,6 @@ public class Mover2 implements Runnable
 					if(state == WAITING)
 					{
 						// Go to critical section if we received all ACKs.
-						//setAcks(); // Remove this ***
 						if(checkAcks() == true)
 						{
 							state = IN_CS;
@@ -234,7 +233,7 @@ public class Mover2 implements Runnable
 						{
 							setPosition(MainDemo2.BRIDGE_LEFT, MainDemo2.BRIDGE_Y);
 							state = NEITHER;
-							
+
 							// SEND ACK TO EACH ON PENDING
 							sendAcksToPending();
 							clearPending();
@@ -275,7 +274,7 @@ public class Mover2 implements Runnable
 			f.repaint();
 		}
 	}
-	
+
 	// Set x and y coordinates of Mover
 	public void setPosition(int a, int b)
 	{ 
@@ -287,12 +286,12 @@ public class Mover2 implements Runnable
 	{
 		ID = id;
 	}
-	
+
 	public int getID()
 	{
 		return ID;
 	}
-	
+
 	// get x coordinate
 	public int getX() 
 	{ 
@@ -304,25 +303,25 @@ public class Mover2 implements Runnable
 	{ 
 		return y; 
 	}
-	
+
 	public int getState()
 	{
 		return state;
 	}
-	
+
 	public void setState(int n)
 	{
 		if(n >= 0 && n <= 2)
-			state = n;
+		state = n;
 		else
-			return;
+		return;
 	}
-	
+
 	public int getDirection()
 	{
 		return direction;
 	}
-	
+
 	public void setDirection(int n)
 	{
 		if(n >= 0 && n <= 3)
@@ -336,13 +335,13 @@ public class Mover2 implements Runnable
 	{ 
 		return "[" + x + ", " + y + "]";
 	}
-	
+
 	// these represent the current direction the Mover is moving
 	public static final int LEFT = 0;
 	public static final int RIGHT = 1;
 	public static final int UP = 2;
 	public static final int DOWN = 3;
-	
+
 	// these represent the states of the Mover regarding the CS
 	public static final int WAITING = 0;
 	public static final int IN_CS = 1;
