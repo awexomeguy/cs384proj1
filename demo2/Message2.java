@@ -1,11 +1,12 @@
 import java.util.Date;
 
+/** This class contains all information that needs to be passed to different movers during simulation */
 public class Message2
 {
-	private int m_id;
-	private boolean m_type; // request = FALSE ... ack = TRUE
-	private Date m_timestamp;
-	private int m_direction;
+	private int m_id; /** ID of the mover who generated this message */
+	private boolean m_type; /** Type of message. request = FALSE ... ack = TRUE */
+	private Date m_timestamp; /** Time at which this message was generated */
+	private int m_direction; /** Which direction the sender is moving */
 	
 	Message2(int senderID, boolean Type, Date Timestamp, int direction)
 	{

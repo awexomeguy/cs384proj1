@@ -2,20 +2,20 @@ import java.util.*;
 import java.util.concurrent.*;
 import javax.swing.*;
 
-// this class emulates the people and their decision-making process.
-// the mutual exclusion code is included in this class.
+/** this class emulates the people and their decision-making process.
+ The mutual exclusion code is included in this class. */
 public class Mover2 implements Runnable
 {
 	protected JFrame f;
 	protected JSlider s;
-	protected int x, y; // coordinates of the Mover
-	protected int state; // state of the Mover (in CS, waiting for CS, or neither)
-	protected int direction; // current direction of Mover
+	protected int x, y; /** coordinates of the Mover */
+	protected int state; /** state of the Mover (in CS, waiting for CS, or neither) */
+	protected int direction; /** current direction of Mover */
 	protected int ID;
-	protected LinkedBlockingQueue<Message2> [] q; // acts as the message channels for all movers
-	protected boolean [] pending = new boolean[MainDemo2.NUM_OF_MOVERS]; // to keep track of all pending requests
-	protected boolean [] acks = new boolean[MainDemo2.NUM_OF_MOVERS]; // to keep track of received acks
-	protected Date reqStamp; // so we know when we sent a request
+	protected LinkedBlockingQueue<Message2> [] q; /** acts as the message channels for all movers */
+	protected boolean [] pending = new boolean[MainDemo2.NUM_OF_MOVERS]; /** to keep track of all pending requests */
+	protected boolean [] acks = new boolean[MainDemo2.NUM_OF_MOVERS]; /** to keep track of received acks */
+	protected Date reqStamp; /** so we know when we sent a request */
 
 	public Mover2(JFrame frame, JSlider slide, LinkedBlockingQueue [] Q)
 	{
@@ -25,7 +25,7 @@ public class Mover2 implements Runnable
 		state = NEITHER;
 	}
 
-	// clears all records of pending requests we received
+	/** clears all records of pending requests we received */
 	private void clearPending()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; i++)
@@ -34,7 +34,7 @@ public class Mover2 implements Runnable
 		}
 	}
 
-	// clears all records of acks we received
+	/** clears all records of acks we received */
 	private void clearAcks()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; i++)
@@ -45,8 +45,8 @@ public class Mover2 implements Runnable
 		acks[ID] = true;
 	}
 
-	// this method takes a Message as input and the mover
-	// takes the appropriate action according to the content of the message
+	/** this method takes a Message as input and the mover and 
+	takes the appropriate action according to the content of the message */
 	private synchronized void parseMessage(Message2 m)
 	{
 		if(m.isRequest()) {  
@@ -74,7 +74,7 @@ public class Mover2 implements Runnable
 
 	}
 
-	// this method puts a request into the queue of all other movers
+	/** this method puts a request into the queue of all other movers */
 	private synchronized void sendRequestToAll()
 	{
 		reqStamp = new Date();
@@ -89,7 +89,7 @@ public class Mover2 implements Runnable
 			}
 	}
 
-	// this method puts an ack message into the queue of the specified mover
+	/** this method puts an ack message into the queue of the specified mover */
 	private synchronized void sendAckTo(int receiver)
 	{
 		try
@@ -98,8 +98,8 @@ public class Mover2 implements Runnable
 		} catch(InterruptedException ex){};
 	}
 
-	// this method tells the mover whether it has received all necessary acks or not.
-	// returns true if the mover has all needed acks (can enter CS), otherwise false
+	/** this method tells the mover whether it has received all necessary acks or not.
+	It returns true if the mover has all needed acks (can enter CS), otherwise false */
 	private boolean checkAcks()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS; i++)
@@ -118,8 +118,8 @@ public class Mover2 implements Runnable
 		return true;
 	}
 
-	// this method puts an ack message into the queue of all movers
-	// recorded in the pending array
+	/** this method puts an ack message into the queue of all movers
+	recorded in the pending array */
 	private void sendAcksToPending()
 	{
 		for(int i = 0; i < MainDemo2.NUM_OF_MOVERS;i++)
@@ -131,8 +131,8 @@ public class Mover2 implements Runnable
 		}
 	}
 
-	// this method is the actual simulation.
-	// the mover will change its position, direction, and state according to messages it receives
+	/** this method is the actual simulation.
+	The mover will change its position, direction, and state according to messages it receives */
 	public void run()
 	{
 		while(true)
@@ -275,7 +275,7 @@ public class Mover2 implements Runnable
 		}
 	}
 
-	// Set x and y coordinates of Mover
+	/** Set x and y coordinates of Mover */
 	public void setPosition(int a, int b)
 	{ 
 		x = a;
@@ -292,13 +292,13 @@ public class Mover2 implements Runnable
 		return ID;
 	}
 
-	// get x coordinate
+	/** get x coordinate */
 	public int getX() 
 	{ 
 		return x; 
 	}  
 
-	// get y coordinate
+	/** get y coordinate */
 	public int getY() 
 	{ 
 		return y; 
@@ -330,7 +330,7 @@ public class Mover2 implements Runnable
 			return;
 	}
 
-	// convert the position of the Mover into a String representation
+	/** convert the position of the Mover into a String representation */
 	public String toString() 
 	{ 
 		return "[" + x + ", " + y + "]";

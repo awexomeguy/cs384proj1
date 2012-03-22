@@ -2,6 +2,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.concurrent.*;
 
+/** This class simulates mutual exclusion that allows multiple movers
+to cross the bridge if they are going in the same direction */
 public class MainDemo2 extends JFrame 
 {
     // the following parameters are used to define the path the Movers take
@@ -15,9 +17,9 @@ public class MainDemo2 extends JFrame
     public static final int MIN_X = 100;
     public static final int NUM_OF_MOVERS = 4; // number of movers on the road
     
-    private Mover2 [] movers; // the movers in the simulation
-    private JSlider [] sliders; // used to control the speed of the movers
-    private LinkedBlockingQueue<Message2> [] threadq = new LinkedBlockingQueue[NUM_OF_MOVERS]; // acts as the message channels for every mover
+    private Mover2 [] movers; /** the movers in the simulation */
+    private JSlider [] sliders; /** used to control the speed of the movers */
+    private LinkedBlockingQueue<Message2> [] threadq = new LinkedBlockingQueue[NUM_OF_MOVERS]; /** acts as the message channels for every mover */
     Graphics bufferGraphics;
     Image offscreen;
 
