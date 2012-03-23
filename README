@@ -23,3 +23,25 @@ Then to run the program, use the command
 	java MainDemo2
 	
 Use the sliders at the top of the window to control the movement speed of the people (represented by colored circles)
+
+See index.html for function over view
+
+Logical Overview:
+	The programs simulates a protocol set, by way of threads to represent individual protocols. To simulate communication channels, we used queues. 
+The queues acts like a non blocking channel, so the queues represent a non FIFO communication. A message class is used; it denotes the protocol id, 
+the direction the process wishes to go, and the time at which it requested to enter the bridge(i.e. The critical section).
+
+	The algorithm used for the first demo was a plain implementation of the Ricart & Agrwala. When a node reach the bridge, it would wait and send a 
+request to all nodes. If a request is sent to the node while it is in a waiting state, it checks the timestamp of the request, if the requested 
+timestamp is earlier then the timestamp of the waiting node, it sends an acknowledgment to the requesting node. When the waiting node receives an 
+acknowledgment from all other nodes, it would enter the bridge and continue to the other side. While on the bridge the node would go to a IN_CS status, 
+and as such any request sent to it in this state would be buffered and addressed when the node leaves the bridge and it's status becomes idle. The speed 
+at which a node reaches the critical sections depends on the slider of the demo, with an individual slider for each node.
+
+
+	The algorithm used for the second demo is much like the first when idling and in the critical section. The difference comes when waiting for the CS. 
+When waiting for the bridge and receiving a request for the critical section, the waiting node not only checks for the timestamp but also the direction the 
+node is going and whether it has has already received earlier request for the opposite direction. If no node has already requested to go the opposite direction 
+of the waiting node, the node will send the requesting node acknowledgment as if it had an earlier timestamp, as long as it is going the same way. The check for 
+earlier request in the opposite direction is to prevent starvation of a node from the critical section.
+				
